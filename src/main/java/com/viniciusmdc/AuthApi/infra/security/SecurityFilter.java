@@ -50,7 +50,12 @@ public class SecurityFilter extends OncePerRequestFilter {
             String login = tokenService.validarAccessToken(token);
             Usuario usuario = usuarioService.findUsuarioByLogin(login);
 
-            validarAutorizacao(request, usuario);
+            if(!isAutorizado(request, usuario)){
+                response.setStatus(HttpStatus.FORBIDDEN.value());
+                response.getWriter().flush();
+
+                return;
+            };
 
             UsernamePasswordAuthenticationToken authentication = new UsernamePasswordAuthenticationToken(usuario, null, List.of());
             SecurityContextHolder.getContext().setAuthentication(authentication);
@@ -60,19 +65,16 @@ public class SecurityFilter extends OncePerRequestFilter {
 
     }
 
-    private void validarAutorizacao(HttpServletRequest request, Usuario usuario) {
+    private boolean isAutorizado(HttpServletRequest request, Usuario usuario) {
         String requestUrl = request.getRequestURI().replace(urlBase, "");
 
         List<Funcao> funcoes = funcaoService.findByNomesGrupoIn(usuario.getGrupos());
 
-        boolean isAutorizado = funcoes.stream().anyMatch(funcao ->
+        return funcoes.stream().anyMatch(funcao ->
                 antPathMatcher.match(funcao.getUrl(), requestUrl) &&
                         (funcao.getMetodo() == null || funcao.getMetodo().equals("") || funcao.getMetodo().toUpperCase().equals(request.getMethod()))
         );
 
-        if (!isAutorizado) {
-            throw new ResponseStatusException(HttpStatus.FORBIDDEN);
-        }
     }
 
     private String getToken(HttpServletRequest request) {
