@@ -1,0 +1,1 @@
+UPDATE tb_funcao SET url='/usuario/get/*' WHERE id= (select id from tb_funcao where descricao = 'Consultar usuário');
