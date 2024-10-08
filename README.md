@@ -49,7 +49,9 @@ GET /usuario/get/{id} - Obtém o usuário referente ao id informado (requer aces
 
 POST /usuario/criar - Cria um novo usuário (requer acesso ADMIN).
 
-POST /auth/login - Realiza o login na aplicação
+POST /auth/login - Realiza o login na aplicação.
+
+POST /auth/refresh-token - Gera um novo access token a partir de um refresh token.
 ```
 
 ## Autenticação
