@@ -3,18 +3,17 @@ package com.viniciusmdc.AuthApi.service;
 import com.viniciusmdc.AuthApi.domain.Grupo;
 import com.viniciusmdc.AuthApi.domain.Usuario;
 import com.viniciusmdc.AuthApi.dto.CreateUsuarioDTO;
-import com.viniciusmdc.AuthApi.dto.UsuarioDTO;
 import com.viniciusmdc.AuthApi.repository.UsuarioRepository;
 import jakarta.transaction.Transactional;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.annotation.Lazy;
 import org.springframework.http.HttpStatus;
-import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.web.server.ResponseStatusException;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.stream.Collectors;
 
 @Service
 public class UsuarioService {
@@ -24,6 +23,9 @@ public class UsuarioService {
 
     @Autowired
     GrupoService grupoService;
+
+    @Autowired @Lazy
+    PasswordEncoder passwordEncoder;
 
     public Usuario findUsuarioByLogin(String login){
         Usuario user = usuarioRepository.findByLogin(login);
@@ -44,7 +46,7 @@ public class UsuarioService {
         }
         usuario = userDTO.convertDtoToEntity();
 
-        String encryptedPassword = new BCryptPasswordEncoder().encode(userDTO.getSenha());
+        String encryptedPassword = passwordEncoder.encode(userDTO.getSenha());
         usuario.setSenha(encryptedPassword);
 
         List<Grupo> grupos = new ArrayList<>();
@@ -54,9 +56,5 @@ public class UsuarioService {
         usuario.setGrupos(grupos);
 
         usuarioRepository.save(usuario);
-    }
-
-    public boolean isAutorizado(String url){
-        return false;
     }
 }

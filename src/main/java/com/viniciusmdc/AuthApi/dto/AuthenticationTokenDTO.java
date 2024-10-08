@@ -1,6 +1,5 @@
 package com.viniciusmdc.AuthApi.dto;
 
-import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -14,5 +13,7 @@ import lombok.Setter;
 public class AuthenticationTokenDTO {
 
     private String accessToken;
+
+    private String refreshToken;
 
 }

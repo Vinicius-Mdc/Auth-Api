@@ -1,6 +1,8 @@
 package com.viniciusmdc.AuthApi.infra.security;
 
+import com.viniciusmdc.AuthApi.enums.TipoTokenJwtEnum;
 import com.viniciusmdc.AuthApi.service.AuthenticationService;
+import jakarta.servlet.DispatcherType;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -16,17 +18,19 @@ import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
-import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 
 @Configuration
 @EnableWebSecurity
 public class SecurityConfigurations {
 
     @Autowired
-    SecurityFilter securityFilter;
+    AuthenticationService authenticationService;
 
     @Autowired
-    AuthenticationService authenticationService;
+    CustomAccessDeniedHandler accessDeniedHandler;
+
+    @Autowired
+    CustomAuthenticationEntryPoint customAuthenticationEntryPoint;
 
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity httpSecurity) throws Exception {
@@ -34,11 +38,16 @@ public class SecurityConfigurations {
                 .csrf(AbstractHttpConfigurer::disable)
                 .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .authorizeHttpRequests(authorize -> authorize
-                        .requestMatchers(HttpMethod.POST, "/auth/login").permitAll()
+                        .dispatcherTypeMatchers(DispatcherType.ERROR).permitAll()
                         .requestMatchers(HttpMethod.GET, "/swagger-ui/**").permitAll()
                         .requestMatchers(HttpMethod.GET, "/v3/api-docs/**").permitAll()
-                        .anyRequest().authenticated())
-                .addFilterBefore(securityFilter, UsernamePasswordAuthenticationFilter.class)
+                        .requestMatchers(HttpMethod.POST, "/auth/login").permitAll()
+                        .requestMatchers(HttpMethod.POST, "/auth/refresh-token").access((authentication, requestAuthorizationContext) -> authenticationService.validarTokenJwt(authentication, requestAuthorizationContext, TipoTokenJwtEnum.REFRESH))
+                        .anyRequest().access(authenticationService::validarAutenticacaoAutorizacao)
+                )
+                .exceptionHandling((exception)-> exception
+                        .accessDeniedHandler(accessDeniedHandler)
+                        .authenticationEntryPoint(customAuthenticationEntryPoint))
                 .build();
     }
 

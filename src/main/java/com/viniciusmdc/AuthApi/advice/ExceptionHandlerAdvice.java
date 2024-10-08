@@ -5,6 +5,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ExceptionHandler;
+import org.springframework.web.bind.annotation.RestControllerAdvice;
 import org.springframework.web.context.request.WebRequest;
 import org.springframework.web.server.ResponseStatusException;
 import org.springframework.web.servlet.mvc.method.annotation.ResponseEntityExceptionHandler;
@@ -14,6 +15,7 @@ import java.util.HashMap;
 import java.util.Map;
 
 @ControllerAdvice
+@RestControllerAdvice
 public class ExceptionHandlerAdvice
         extends ResponseEntityExceptionHandler {
 
@@ -32,7 +34,7 @@ public class ExceptionHandlerAdvice
 
     @ExceptionHandler(value
             = {Exception.class, Exception.class})
-    protected ResponseEntity<Object> handleResponseStatusException(
+    protected ResponseEntity<Object> handleDefaultException(
             Exception ex, WebRequest request) {
         Map<String, Object> bodyOfResponse = new HashMap<>();
         bodyOfResponse.put("message", ex.getMessage());
@@ -43,4 +45,5 @@ public class ExceptionHandlerAdvice
         return handleExceptionInternal(ex, bodyOfResponse,
                 new HttpHeaders(), HttpStatus.INTERNAL_SERVER_ERROR, request);
     }
+
 }

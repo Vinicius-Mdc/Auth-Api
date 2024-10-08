@@ -39,6 +39,9 @@ public class Usuario implements UserDetails {
             inverseJoinColumns = @JoinColumn(name = "id_grupo"))
     private List<Grupo> grupos;
 
+    @OneToMany(fetch = FetchType.LAZY, cascade = {CascadeType.PERSIST, CascadeType.MERGE, CascadeType.DETACH, CascadeType.REFRESH})
+    private List<RefreshToken> refreshTokens;
+
     public UsuarioDTO convertEntityToDto(){
         return new ModelMapper().map(this,UsuarioDTO.class);
     }
