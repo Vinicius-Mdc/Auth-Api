@@ -3,7 +3,6 @@ package com.viniciusmdc.AuthApi.service;
 import com.viniciusmdc.AuthApi.domain.Funcao;
 import com.viniciusmdc.AuthApi.domain.Usuario;
 import com.viniciusmdc.AuthApi.enums.TipoTokenJwtEnum;
-import com.viniciusmdc.AuthApi.repository.UsuarioRepository;
 import jakarta.servlet.http.HttpServletRequest;
 import lombok.extern.log4j.Log4j2;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -14,9 +13,6 @@ import org.springframework.security.authentication.UsernamePasswordAuthenticatio
 import org.springframework.security.authorization.AuthorizationDecision;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
-import org.springframework.security.core.userdetails.UserDetails;
-import org.springframework.security.core.userdetails.UserDetailsService;
-import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.web.access.intercept.RequestAuthorizationContext;
 import org.springframework.stereotype.Service;
 import org.springframework.util.AntPathMatcher;
@@ -27,7 +23,7 @@ import java.util.function.Supplier;
 
 @Service
 @Log4j2
-public class AuthenticationService implements UserDetailsService {
+public class AuthenticationService {
 
     @Autowired
     UsuarioService usuarioService;
@@ -38,19 +34,10 @@ public class AuthenticationService implements UserDetailsService {
     @Autowired
     TokenService tokenService;
 
-    @Autowired
-    UsuarioRepository usuarioRepository;
-
     @Value("${spring.mvc.servlet.path}")
     private String urlBase;
 
     private final AntPathMatcher antPathMatcher = new AntPathMatcher();
-
-    @Override
-    public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
-        return usuarioRepository.findByLogin(username);
-    }
-
 
     public AuthorizationDecision validarAutenticacaoAutorizacao(Supplier<Authentication> authentication, RequestAuthorizationContext requestAuthorizationContext) {
         try {
